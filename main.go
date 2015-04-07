@@ -62,9 +62,8 @@ func api(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "ramload in malformat: "+ramLoad, http.StatusBadRequest)
 			return
 		}
-		if unixTime == "" {
-			unixTimeValue = time.Now().Unix()
-		}
+		unixTimeValue = time.Now().Unix()
+		unixTimeValue, _ = strconv.ParseInt(unixTime, 10, 64)
 		as.recordLoad(serverName, unixTimeValue, float32(cpuLoadValue), float32(ramLoadValue))
 		w.WriteHeader(200)
 
