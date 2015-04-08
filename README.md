@@ -21,6 +21,12 @@ $ go test -v
 $ go test -v -race
 ```
 
+To run benchmark test:
+
+```bash
+$ go test -bench=.
+```
+
 The server would listen on port 30000, it has two apis:
 * GET: http://localhost:30000/load?servername=xxxxx
 * POST: http://localhost:30000/load?servername=yyyyy&cpuload=xx.xx&ramload=yy.yy

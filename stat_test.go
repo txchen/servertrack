@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"sync"
 	"testing"
 	"time"
@@ -135,4 +136,22 @@ func TestAllserverStatsRecordAndGet(t *testing.T) {
 	md2, hd2 := as.getLoad("s3", currentTime)
 	assert.Nil(t, md2)
 	assert.Nil(t, hd2)
+}
+
+func BenchmarkRecordLoad(b *testing.B) {
+	as := newAllserverStats()
+	for n := 0; n < b.N; n++ {
+		as.recordLoad("testserver1", time.Now().UTC().Unix(), 15.0, 20.0)
+	}
+}
+
+func BenchmarkGetLoad(b *testing.B) {
+	as := newAllserverStats()
+	currentTime := time.Now().UTC().Unix()
+	for i := 0; i < 1000; i++ {
+		as.recordLoad("testserver2", currentTime+rand.Int63n(86400), rand.Float32()*100, rand.Float32()*100)
+	}
+	for n := 0; n < b.N; n++ {
+		as.getLoad("testserver2", currentTime+int64(n)%86400)
+	}
 }
