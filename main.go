@@ -25,9 +25,14 @@ func api(w http.ResponseWriter, r *http.Request) {
 	}
 	serverName = strings.ToLower(serverName)
 
+	unixTime := r.URL.Query().Get("unixtime")
+	var unixTimeValue int64
+	unixTimeValue = time.Now().Unix()
+	unixTimeValue, _ = strconv.ParseInt(unixTime, 10, 64)
+
 	switch r.Method {
 	case "GET":
-		md, hd := as.getLoad(serverName, time.Now().Unix())
+		md, hd := as.getLoad(serverName, unixTimeValue)
 		if md == nil {
 			http.Error(w, "cannot find data for server:"+serverName, http.StatusNotFound)
 			return
@@ -44,8 +49,6 @@ func api(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		cpuLoad := r.URL.Query().Get("cpuload")
 		ramLoad := r.URL.Query().Get("ramload")
-		unixTime := r.URL.Query().Get("unixtime")
-		var unixTimeValue int64
 		var cpuLoadValue, ramLoadValue float64
 		var err error
 		if cpuLoad == "" || ramLoad == "" {
@@ -62,8 +65,6 @@ func api(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "ramload in malformat: "+ramLoad, http.StatusBadRequest)
 			return
 		}
-		unixTimeValue = time.Now().Unix()
-		unixTimeValue, _ = strconv.ParseInt(unixTime, 10, 64)
 		as.recordLoad(serverName, unixTimeValue, float32(cpuLoadValue), float32(ramLoadValue))
 		w.WriteHeader(200)
 
