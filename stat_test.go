@@ -17,19 +17,19 @@ func TestLoadSlotAppend(t *testing.T) {
 	ls.appendLoad(30.0, 60.0, currentMin)
 	assert.Equal(t, 30.0, ls.AvgCPU)
 	assert.Equal(t, 60.0, ls.AvgRAM)
-	assert.Equal(t, 1, ls.Count)
+	assert.Equal(t, uint64(1), ls.Count)
 	assert.Equal(t, currentMin, ls.StartUnixTime)
 	// now append more
 	ls.appendLoad(60.0, 10.0, currentMin)
 	assert.Equal(t, 45.0, ls.AvgCPU)
 	assert.Equal(t, 35.0, ls.AvgRAM)
-	assert.Equal(t, 2, ls.Count)
+	assert.Equal(t, uint64(2), ls.Count)
 	assert.Equal(t, currentMin, ls.StartUnixTime)
 	// append with new minute, data should be reset
 	ls.appendLoad(5.0, 8.0, currentMin+60)
 	assert.Equal(t, 5.0, ls.AvgCPU)
 	assert.Equal(t, 8.0, ls.AvgRAM)
-	assert.Equal(t, 1, ls.Count)
+	assert.Equal(t, uint64(1), ls.Count)
 	assert.Equal(t, currentMin+60, ls.StartUnixTime)
 }
 
@@ -41,8 +41,8 @@ func TestServerStatAddLoad(t *testing.T) {
 	currentHour := (currentTime / 3600) % 24
 	ss.addLoad(currentTime, 20.0, 2.0)
 	ss.addLoad(currentTime, 40.0, 4.0)
-	assert.Equal(t, 2, ss.minuteData[currentMinute].Count)
-	assert.Equal(t, 2, ss.hourData[currentHour].Count)
+	assert.Equal(t, uint64(2), ss.minuteData[currentMinute].Count)
+	assert.Equal(t, uint64(2), ss.hourData[currentHour].Count)
 	assert.Equal(t, 30.0, ss.minuteData[currentMinute].AvgCPU)
 	assert.Equal(t, 30.0, ss.hourData[currentHour].AvgCPU)
 	assert.Equal(t, 3.0, ss.minuteData[currentMinute].AvgRAM)
@@ -54,9 +54,9 @@ func TestServerStatAddLoad(t *testing.T) {
 	}
 	nextMinute := (nextMinuteTime / 60) % 60
 	ss.addLoad(nextMinuteTime, 60.0, 6.0)
-	assert.Equal(t, 2, ss.minuteData[currentMinute].Count)
-	assert.Equal(t, 1, ss.minuteData[nextMinute].Count)
-	assert.Equal(t, 3, ss.hourData[currentHour].Count)
+	assert.Equal(t, uint64(2), ss.minuteData[currentMinute].Count)
+	assert.Equal(t, uint64(1), ss.minuteData[nextMinute].Count)
+	assert.Equal(t, uint64(3), ss.hourData[currentHour].Count)
 	assert.Equal(t, 30.0, ss.minuteData[currentMinute].AvgCPU)
 	assert.Equal(t, 60.0, ss.minuteData[nextMinute].AvgCPU)
 	assert.Equal(t, 40.0, ss.hourData[currentHour].AvgCPU)
@@ -67,10 +67,10 @@ func TestServerStatAddLoad(t *testing.T) {
 	nextHourTime := currentTime + 3600
 	nextHour := (nextHourTime / 3600) % 24
 	ss.addLoad(nextHourTime, 80.0, 8.0)
-	assert.Equal(t, 1, ss.minuteData[currentMinute].Count) // overwritten
-	assert.Equal(t, 1, ss.minuteData[nextMinute].Count)
-	assert.Equal(t, 3, ss.hourData[currentHour].Count)
-	assert.Equal(t, 1, ss.hourData[nextHour].Count)
+	assert.Equal(t, uint64(1), ss.minuteData[currentMinute].Count) // overwritten
+	assert.Equal(t, uint64(1), ss.minuteData[nextMinute].Count)
+	assert.Equal(t, uint64(3), ss.hourData[currentHour].Count)
+	assert.Equal(t, uint64(1), ss.hourData[nextHour].Count)
 	assert.Equal(t, 80.0, ss.minuteData[currentMinute].AvgCPU)
 	assert.Equal(t, 40.0, ss.hourData[currentHour].AvgCPU)
 	assert.Equal(t, 80.0, ss.hourData[nextHour].AvgCPU)
@@ -125,12 +125,12 @@ func TestAllserverStatsRecordAndGet(t *testing.T) {
 	assert.Equal(t, 1, len(md))
 	assert.Equal(t, 20.0, md[0].AvgCPU)
 	assert.Equal(t, 2.0, md[0].AvgRAM)
-	assert.Equal(t, 5, md[0].Count)
+	assert.Equal(t, uint64(5), md[0].Count)
 	assert.Equal(t, currentTime/60*60, md[0].StartUnixTime)
 	assert.Equal(t, 1, len(hd))
 	assert.Equal(t, 20.0, hd[0].AvgCPU)
 	assert.Equal(t, 2.0, hd[0].AvgRAM)
-	assert.Equal(t, 5, hd[0].Count)
+	assert.Equal(t, uint64(5), hd[0].Count)
 	assert.Equal(t, currentTime/3600*3600, hd[0].StartUnixTime)
 	// get non-existing server
 	md2, hd2 := as.getLoad("s3", currentTime)
